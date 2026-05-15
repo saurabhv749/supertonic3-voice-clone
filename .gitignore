@@ -1,0 +1,11 @@
+# Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# folders
+supertonic3
+
+# vs code
+.vscode/

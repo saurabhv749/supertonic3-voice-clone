@@ -1,0 +1,13 @@
+{
+    "name": "F6",
+    "gender": "F",
+    "target_wav": "voices/F6.wav",
+    "reference_style": null,
+    "seed": 749,
+    "lr": 0.0002,
+    "num_steps": 3000,
+    "total_step": 6,
+    "speed": 1.05,
+    "save_every": 500,
+    "early_stop_loss_threshold": 0.01
+}
