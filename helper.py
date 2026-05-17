@@ -327,8 +327,7 @@ def load_text_to_speech(onnx_dir: str, use_gpu: bool = False) -> TextToSpeech:
     if use_gpu:
         raise NotImplementedError("GPU mode is not fully tested")
     else:
-        providers = ["DmlExecutionProvider", "CPUExecutionProvider"]
-        # providers = ["CPUExecutionProvider"]
+        providers = ["CPUExecutionProvider"]
         print("Using CPU for inference")
     cfgs = load_cfgs(onnx_dir)
     dp_ort, text_enc_ort, vector_est_ort, vocoder_ort = load_onnx_all(
