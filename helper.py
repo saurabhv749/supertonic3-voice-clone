@@ -9,12 +9,15 @@ import numpy as np
 import onnxruntime as ort
 
 import re
+from indic import HindiNumberPreprocessor
 
 AVAILABLE_LANGS = ["en", "ko", "ja", "ar", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "hi", "hr", "hu", "id", "it", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "vi"]
 
 
 class UnicodeProcessor:
     def __init__(self, unicode_indexer_path: str):
+        self.hindi_processor = HindiNumberPreprocessor()
+
         with open(unicode_indexer_path, "r") as f:
             self.indexer = json.load(f)
 
@@ -101,6 +104,11 @@ class UnicodeProcessor:
 
         if lang not in AVAILABLE_LANGS:
             raise ValueError(f"Invalid language: {lang}")
+        
+        # Hindi numeral processor
+        if lang == 'hi':
+            text = self.hindi_processor.process_mixed_string(text)
+
         text = f"<{lang}>" + text + f"</{lang}>"
         return text
 
