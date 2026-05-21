@@ -9,7 +9,7 @@ import numpy as np
 import onnxruntime as ort
 
 import re
-from indic import HindiNumberPreprocessor
+from indic import HindiNumberPreprocessor, hindi_replacements
 
 AVAILABLE_LANGS = ["en", "ko", "ja", "ar", "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "hi", "hr", "hu", "id", "it", "lt", "lv", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "tr", "uk", "vi"]
 
@@ -72,8 +72,19 @@ class UnicodeProcessor:
         # Replace known expressions
         expr_replacements = {
             "@": " at ",
+            "&": " and ",
+            "%": " percent ",
+            "~": " about ",
             "e.g.,": "for example, ",
             "i.e.,": "that is, ",
+            "etc.": "and so on.",
+            "vs.": "versus",
+            '<=': ' less than or equal to ',
+            '>=': ' greater than or equal to ',
+            '<': ' less than ',
+            '>': ' greater than ',
+            '=': ' equals ',
+            '/': ' slash ',
         }
         for k, v in expr_replacements.items():
             text = text.replace(k, v)
@@ -105,9 +116,11 @@ class UnicodeProcessor:
         if lang not in AVAILABLE_LANGS:
             raise ValueError(f"Invalid language: {lang}")
         
-        # Hindi numeral processor
+        # Hindi specific processing
         if lang == 'hi':
             text = self.hindi_processor.process_mixed_string(text)
+            for k, v in hindi_replacements.items():
+                text = text.replace(k, v)
 
         text = f"<{lang}>" + text + f"</{lang}>"
         return text
