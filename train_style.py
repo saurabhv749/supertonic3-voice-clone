@@ -39,10 +39,11 @@ def main():
     name= config.NAME
     gender= config.GENDER
     target_wav_path= config.TARGET_WAV_PATH
+    target_lang= config.TARGET_WAV_LANG
     reference_style= config.REFERENCE_STYLE
     seed= config.SEED
     speed= config.SPEED
-    vocoder_steps = config.VOCODER_STEPS
+    ve_steps = config.VE_STEPS
     
 
     # models
@@ -57,9 +58,9 @@ def main():
     os.makedirs(log_dir, exist_ok=True)
     
     # ===== 4. Generate fixed noisy latent (seed-controlled) =====
-
     # create dataset
-    dataloader = get_train_dataloader(TTS, texts)
+    train_texts = [ t for t in texts if t[0]==target_lang]
+    dataloader = get_train_dataloader(TTS, train_texts)
     data_iter = iter(dataloader)
     # seed
     torch.manual_seed(seed)
@@ -101,7 +102,7 @@ def main():
 
             with torch.no_grad():
                 _, loss = model(tmp_input_ids, tmp_attention_mask,
-                                    s_ttl, vocoder_steps,
+                                    s_ttl, ve_steps,
                                     noisy_latent_fixed, latent_mask
                                     )
 
@@ -156,7 +157,7 @@ def main():
         current_text_mask = current_text_mask.to(DEVICE)
         # Forward pass
         _, loss = model(
-            text_ids_batch, current_text_mask, style_ttl, vocoder_steps, noisy_latent_fixed, latent_mask,
+            text_ids_batch, current_text_mask, style_ttl, ve_steps, noisy_latent_fixed, latent_mask,
         )
 
         # Backward + update
