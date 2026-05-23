@@ -9,8 +9,8 @@ class TrainConfig:
     # training parameters
     SEED = 749
     SPEED = 1.05
-    NUM_STEPS = 3000
-    LEARNING_RATE = 0.0002
+    NUM_STEPS = 2000
+    LEARNING_RATE = 0.0004
     VE_STEPS = 6
     SAVE_STEPS = 500
     EARLY_STOP_LOSS_THRESHOLD = 0.015

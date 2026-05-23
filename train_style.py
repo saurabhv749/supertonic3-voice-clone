@@ -131,14 +131,15 @@ def main():
     threshold= config.EARLY_STOP_LOSS_THRESHOLD
     lr = config.LEARNING_RATE
     start_step = 0
-    log_step = 8
+    log_step = 20
+    lr_update_steps = max_num_steps // 20
     best_loss = float('inf')
     best_ttl = None
     best_dp = style_dp.detach().clone()
     
     optimizer = torch.optim.Adam([style_ttl], lr=lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, patience=200, factor=0.5, min_lr=lr * 0.01
+    scheduler = torch.optim.lr_scheduler.LinearLR(
+        optimizer, start_factor=1.0, end_factor=0.1, total_iters=lr_update_steps
     )
 
     optimizer.zero_grad()
@@ -164,8 +165,10 @@ def main():
         loss.backward()
         torch.nn.utils.clip_grad_norm_([style_ttl], max_norm=1.0)
         optimizer.step()
-        scheduler.step(loss)
         optimizer.zero_grad()
+        
+        if (step + 1) % lr_update_steps == 0:
+            scheduler.step()
 
         step_loss = loss.detach().item() 
         # Track best
