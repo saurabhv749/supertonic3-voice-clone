@@ -1,22 +1,27 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/saurabhv749/supertonic3-voice-clone/blob/main/voice_style_demo.ipynb)
 
 # supertonic3-voice-clone
-
+![project-logo](assets/cloner-logo.jpg)
 Train voice styles(.json files) for Supertone/supertonic-3 model.
 
-## Key Features
+## ✨ Key Features
 
 - Low GPU footprint: peak memory ~2.6 GB.
 - Fast training: typical run time ranges from ~6 to 30 minutes depending on the source voice and dataset size.
 - Flexible: works for single-speaker cloning and style extraction; training to capture accents or complex prosody may take longer.
 
-## Generated Samples
+## 🎧 Generated Samples
 
 | Audio Description | Listen Link |
 | :--- | :--- |
 | **Source (F6)** | [▶️ Play Audio](voices/F6.wav) |
 | **Styled generation(F6)** | [▶️ Play Audio](samples/F6_1778883929.wav) |
 | **F7 (en -> hi)** | [▶️ Play Audio](samples/F7_1778896504.wav) |
+
+## Limitations
+
+While this approach captures speaker identity, its ability to clone emotional expressiveness is limited. This is because the current loss function prioritizes identity over prosody. Furthermore, the original speaker encoder was not released by the developers.
+Check the `samples/` folder for examples of the current results.
 
 ## Responsible Use & Ethical Considerations
 
