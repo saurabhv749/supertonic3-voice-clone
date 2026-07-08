@@ -18,6 +18,25 @@ Train voice styles(.json files) for Supertone/supertonic-3 model.
 | **Styled generation(F6)** | [▶️ Play Audio](samples/F6_1778883929.wav) |
 | **F7 (en -> hi)** | [▶️ Play Audio](samples/F7_1778896504.wav) |
 
+## ▶️ Script Usage
+
+Example training run with the most commonly changed arguments:
+
+```bash
+python train_style.py \
+  --name my-voice \
+  --target-wav-path voices/my-voice.wav \
+  --num-steps 3000 \
+  --learning-rate 0.0002
+
+```
+
+Important arguments:
+- `--name`: output folder/name for logs and the saved style JSON.
+- `--target-wav-path`: path to the source WAV used for style extraction.
+- `--reference-style`: use `auto` to pick the closest built-in style, `none` for random initialization, or a path to a specific `style checkpoint` JSON file.
+- `--seed`, `--speed`, `--num-steps`, `--learning-rate`, `--vocoder-steps`: core training knobs that affect stability and convergence.
+
 ## Limitations
 
 While this approach captures speaker identity, its ability to clone emotional expressiveness is limited. This is because the current loss function prioritizes identity over prosody. Furthermore, the original speaker encoder was not released by the developers.

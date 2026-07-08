@@ -13,6 +13,7 @@ Usage:
     python train_style.py
 """
 
+import argparse
 import os
 import glob
 import time
@@ -21,9 +22,26 @@ import torch
 
 from helper import load_text_to_speech, load_voice_style as load_voice_styles
 from utils import save_style, SupertonicModel, get_train_dataloader
-from configs import texts, TrainConfig
+from configs import texts
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(description="Optimize a voice style from a target WAV file")
+    parser.add_argument("--name", default="F6", help="Output name for logs and saved style")
+    parser.add_argument("--gender", default="F", choices=["F", "M"], help="Voice gender for selecting the default reference style")
+    parser.add_argument("--target-wav-path", default="voices/F6.wav", help="Path to the target WAV file")
+    parser.add_argument("--reference-style", default="auto", help="Reference style source: 'auto', 'none', or a path to a style checkpoint JSON file")
+    parser.add_argument("--seed", type=int, default=49, help="Random seed")
+    parser.add_argument("--speed", type=float, default=1.05, help="Speech speed multiplier")
+    parser.add_argument("--num-steps", type=int, default=3000, help="Number of optimization steps")
+    parser.add_argument("--learning-rate", type=float, default=0.0002, help="Optimizer learning rate")
+    parser.add_argument("--vocoder-steps", type=int, default=6, help="Vocoder steps used during evaluation")
+    parser.add_argument("--save-steps", type=int, default=500, help="Checkpoint save interval")
+    parser.add_argument("--early-stop-loss-threshold", type=float, default=0.015, help="Loss threshold for early stopping")
+    return parser
+
 
 def load_voice_style(path):
     """ load single voice style """
@@ -34,15 +52,16 @@ def load_voice_style(path):
 
 
 def main():
-    # ===== 0. configs =====
-    config = TrainConfig()
-    name= config.NAME
-    gender= config.GENDER
-    target_wav_path= config.TARGET_WAV_PATH
-    reference_style= config.REFERENCE_STYLE
-    seed= config.SEED
-    speed= config.SPEED
-    vocoder_steps = config.VOCODER_STEPS
+    # ===== configs =====
+    parser = build_parser()
+    args = parser.parse_args()
+    name = args.name
+    gender = args.gender
+    target_wav_path = args.target_wav_path
+    reference_style = None if args.reference_style == "none" else args.reference_style
+    seed = args.seed
+    speed = args.speed
+    vocoder_steps = args.vocoder_steps
     
 
     # models
@@ -56,7 +75,7 @@ def main():
     log_dir = f"logs/{name}"
     os.makedirs(log_dir, exist_ok=True)
     
-    # ===== 4. Generate fixed noisy latent (seed-controlled) =====
+    # ===== Generate fixed noisy latent (seed-controlled) =====
 
     # create dataset
     dataloader = get_train_dataloader(TTS, texts)
@@ -124,11 +143,11 @@ def main():
     print(f"  style_ttl: {style_ttl.shape}, style_dp: {style_dp.shape} (dp frozen)")
 
 
-    # ===== 6. Optimization (style_ttl only, style_dp frozen) =====
-    max_num_steps= config.NUM_STEPS
-    save_steps= config.SAVE_STEPS
-    threshold= config.EARLY_STOP_LOSS_THRESHOLD
-    lr = config.LEARNING_RATE
+    # ===== Optimization (style_ttl only, style_dp frozen) =====
+    max_num_steps = args.num_steps
+    save_steps = args.save_steps
+    threshold = args.early_stop_loss_threshold
+    lr = args.learning_rate
     start_step = 0
     log_step = 8
     best_loss = float('inf')
@@ -188,7 +207,7 @@ def main():
             print(f"  Early stop at step {step+1}: best loss {best_loss:.4f} <= {threshold}")
             break
 
-    # ===== 7. Save final result =====
+    # ===== Save final result =====
     final_path = f"{log_dir}/{name}.json"
     print(f"\nSaving best style to: {final_path}")
     save_style(final_path, best_ttl, best_dp, target_wav_path)
